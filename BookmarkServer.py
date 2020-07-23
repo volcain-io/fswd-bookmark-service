@@ -9,9 +9,9 @@
 #   * A GET request to the / (root) path.  The server returns a form allowing
 #     the user to submit a new name/URI pairing.  The form also includes a
 #     listing of all the known pairings.
-#   * A POST request containing "longuri" and "shortname" fields.  The server
+#   * A POST request containing "long_uri" and "short_name" fields.  The server
 #     checks that the URI is valid (by requesting it), and if so, stores the
-#     mapping from shortname to longuri in its dictionary.  The server then
+#     mapping from short_name to long_uri in its dictionary.  The server then
 #     redirects back to the root path.
 #   * A GET request whose path contains a short name.  The server looks up
 #     that short name in its dictionary and redirects to the corresponding
@@ -24,18 +24,17 @@ from urllib.parse import unquote, parse_qs
 # import threading
 from socketserver import ThreadingMixIn
 
-
 memory = {}
 
 form = '''<!DOCTYPE html>
 <title>Bookmark Server</title>
 <form method="POST">
     <label>Long URI:
-        <input name="longuri">
+        <input name="long_uri">
     </label>
     <br>
     <label>Short name:
-        <input name="shortname">
+        <input name="short_name">
     </label>
     <br>
     <button type="submit">Save it!</button>
@@ -47,7 +46,7 @@ form = '''<!DOCTYPE html>
 '''
 
 
-def CheckURI(uri, timeout=5):
+def check_uri(uri, timeout=5):
     # check URI and return True if the URI could be successfully fetched
     try:
         r = requests.get(uri, timeout=timeout)
@@ -57,7 +56,7 @@ def CheckURI(uri, timeout=5):
         return False
 
 
-class Shortener(http.server.BaseHTTPRequestHandler):
+class url_shortener(http.server.BaseHTTPRequestHandler):
     def do_GET(self):
         # A GET request will either be for / (the root path) or for /some-name.
         # Strip off the / and we have either empty string or a name.
@@ -92,19 +91,19 @@ class Shortener(http.server.BaseHTTPRequestHandler):
         params = parse_qs(body)
 
         # Check that the user submitted the form fields.
-        if "longuri" not in params or "shortname" not in params:
+        if "long_uri" not in params or "short_name" not in params:
             # Serve a 400 error with a useful message.
             self.send_response(400)
             self.send_header('Content-type', 'text/plain')
             self.end_headers()
             self.wfile.write('All fields are mandatory'.encode())
 
-        longuri = params["longuri"][0]
-        shortname = params["shortname"][0]
+        long_uri = params["long_uri"][0]
+        short_name = params["short_name"][0]
 
-        if CheckURI(longuri):
+        if check_uri(long_uri):
             # This URI is good!  Remember it under the specified name.
-            memory[shortname] = longuri
+            memory[short_name] = long_uri
 
             # Serve a redirect to the root page (the form).
             self.send_response(303)
@@ -116,8 +115,8 @@ class Shortener(http.server.BaseHTTPRequestHandler):
             self.send_response(404)
             self.send_header('Content-type', 'text/plain')
             self.end_headers()
-            self.wfile().write('URI couldn\'t be found: {}'.format(longuri)
-                               .encode())
+            self.wfile().write(
+                'URI couldn\'t be found: {}'.format(long_uri).encode())
 
 
 class ThreadHTTPServer(ThreadingMixIn, http.server.HTTPServer):
@@ -128,5 +127,5 @@ if __name__ == '__main__':
     # Use PORT if it's there
     port = int(os.environ.get('PORT', 8000))
     server_address = ('', port)
-    httpd = ThreadHTTPServer(server_address, Shortener)
+    httpd = ThreadHTTPServer(server_address, url_shortener)
     httpd.serve_forever()
