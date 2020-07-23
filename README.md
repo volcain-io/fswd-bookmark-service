@@ -18,12 +18,12 @@ mapping actually works (i.e. returns a 200 OK).
 Example usage via command line:
 ```
 curl \
-  -X POST https://bookmark-service.herokuapp.com/ \
+  -X POST https://fswd-bookmark-service.herokuapp.com/ \
   --data-urlencode "long_uri=https://github.com/volcain-io/fswd-bookmark-service" \
   --data-urlencode "short_name=github-link"
 ```
 
-Refresh website [https://bookmark-service.herokuapp.com](https://bookmark-service.herokuapp.com) to see results.
+Refresh website [https://fswd-bookmark-service.herokuapp.com](https://fswd-bookmark-service.herokuapp.com) to see results.
 
 Example output on website:
 ```
@@ -33,12 +33,12 @@ github-link: https://github.com/volcain-io/fswd-bookmark-service
 
 Example usage via command line:
 ```
-curl -i GET https://bookmark-service.herokuapp.com/github-link
+curl -i GET https://fswd-bookmark-service.herokuapp.com/github-link
 ```
 
 Example useage via web browser:
 ```
-https://bookmark-service.herokuapp.com/github-link
+https://fswd-bookmark-service.herokuapp.com/github-link
 ```
 
 Will redirect you to **long_uri**
